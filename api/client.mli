@@ -9,13 +9,13 @@ type variant = string
 module Ref_map : Map.S with type key = git_ref
 
 module Build_status : sig
-  type t = Raw.Reader.BuildStatus.t
+  type t = Raw.Build.Reader.BuildStatus.t
 
   val pp : t Fmt.t
 end
 
 module State : sig
-  type t = Raw.Reader.JobInfo.State.unnamed_union_t
+  type t = Raw.Build.Reader.JobInfo.State.unnamed_union_t
 
   val pp : t Fmt.t
   val from_build_status : [< `Failed | `Not_started | `Passed | `Pending ] -> t
@@ -30,7 +30,7 @@ type job_info = {
 }
 
 module Commit : sig
-  type t = Raw.Client.Commit.t Capability.t
+  type t = Raw.Build.Client.Commit.t Capability.t
   (** A single commit being tested. *)
 
   val jobs : t -> (job_info list, [> `Capnp of Capnp_rpc.Error.t ]) Lwt_result.t
@@ -52,7 +52,7 @@ module Commit : sig
 end
 
 module Repo : sig
-  type t = Raw.Client.Repo.t Capability.t
+  type t = Raw.Build.Client.Repo.t Capability.t
   (** A GitHub repository that is tested by ocaml-ci. *)
 
   val refs :
@@ -79,7 +79,7 @@ module Repo : sig
 end
 
 module Org : sig
-  type t = Raw.Client.Org.t Capability.t
+  type t = Raw.Build.Client.Org.t Capability.t
   (** A GitHub organisation. *)
 
   type repo_info = { name : string; master_status : Build_status.t }
@@ -94,7 +94,7 @@ module Org : sig
 end
 
 module CI : sig
-  type t = Raw.Client.CI.t Capability.t
+  type t = Raw.Build.Client.CI.t Capability.t
   (** The top-level object for ocaml-ci. *)
 
   val org : t -> string -> Org.t

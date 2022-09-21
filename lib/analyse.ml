@@ -24,7 +24,7 @@ let read_file ~max_len path =
 
 (* A logging service that logs to [job]. *)
 let job_log job =
-  let module X = Ocaml_ci_api.Raw.Service.Log in
+  let module X = Ocaml_ci_api.Raw.Solve.Service.Log in
   X.local
   @@ object
        inherit X.service

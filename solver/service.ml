@@ -210,7 +210,7 @@ let v ~n_workers ~create_worker =
     Epoch.create ~n_workers ~create_worker (Store.Hash.of_hex hash)
   in
   let t = Epoch_lock.v ~create ~dispose:Epoch.dispose () in
-  let module X = Ocaml_ci_api.Raw.Service.Solver in
+  let module X = Ocaml_ci_api.Raw.Solve.Service.Solver in
   X.local
   @@ object
        inherit X.service
