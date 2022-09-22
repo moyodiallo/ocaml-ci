@@ -146,15 +146,15 @@ module Analysis = struct
     in
     let request =
       {
-        Ocaml_ci_api.Worker.Solve_request.opam_repository_commit =
-          Current_git.Commit_id.hash opam_repository_commit;
+        Ocaml_ci_api.Worker.Solve_request.opam_repository_commits =
+          ["https://github.com/ocaml/opam", Current_git.Commit_id.hash opam_repository_commit];
         root_pkgs;
         pinned_pkgs;
         platforms;
       }
     in
     Capnp_rpc_lwt.Capability.with_ref (job_log job) @@ fun log ->
-    Ocaml_ci_api.Solver.solve solver request ~log >|= function
+    Backend_solver.solve solver job request ~log >|= function
     | Error (`Msg msg) -> Fmt.error_msg "Error from solver: %s" msg
     | Ok [] -> Fmt.error_msg "No solution found for any supported platform"
     | Ok x -> (
@@ -282,7 +282,7 @@ module Analysis = struct
 end
 
 module Examine = struct
-  type t = Ocaml_ci_api.Solver.t
+  type t = Backend_solver.t
 
   module Key = struct
     type t = Current_git.Commit.t

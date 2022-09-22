@@ -128,13 +128,14 @@ end = struct
 
   let handle ~log request t =
     let {
-      Worker.Solve_request.opam_repository_commit;
+      Worker.Solve_request.opam_repository_commits;
       platforms;
       root_pkgs;
       pinned_pkgs;
     } =
       request
     in
+    let _, opam_repository_commit = List.hd opam_repository_commits in
     let opam_repository_commit = Store.Hash.of_hex opam_repository_commit in
     let root_pkgs = List.map fst root_pkgs in
     let pinned_pkgs = List.map fst pinned_pkgs in
@@ -201,7 +202,8 @@ end
 
 (* Handle a request by distributing it among the worker processes and then aggregating their responses. *)
 let handle t ~log (request : Worker.Solve_request.t) =
-  Epoch_lock.with_epoch t request.opam_repository_commit
+  let _, opam_repository_commit = List.hd request.opam_repository_commits in
+  Epoch_lock.with_epoch t opam_repository_commit
     (Epoch.handle ~log request)
 
 let v ~n_workers ~create_worker =

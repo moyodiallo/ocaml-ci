@@ -63,13 +63,14 @@ let main commit =
           |> Result.get_ok
         in
         let {
-          Worker.Solve_request.opam_repository_commit;
+          Worker.Solve_request.opam_repository_commits;
           root_pkgs;
           pinned_pkgs;
           platforms;
         } =
           request
         in
+        let _, opam_repository_commit = List.hd opam_repository_commits in
         let opam_repository_commit = Store.Hash.of_hex opam_repository_commit in
         assert (Store.Hash.equal opam_repository_commit commit);
         let root_pkgs = List.map parse_opam root_pkgs in

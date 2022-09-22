@@ -5,9 +5,13 @@ let setup_log default_level =
   Unix.putenv "PROGRESS_NO_TRUNC" "1";
   Prometheus_unix.Logging.init ?default_level ()
 
-let main () config mode repo : ('a, [ `Msg of string ]) result =
+let main () config mode repo submission_uri : ('a, [ `Msg of string ]) result =
   let open Ocaml_ci_service in
-  let solver = Ocaml_ci.Solver_pool.spawn_local () in
+  let solver =
+    if Option.is_none submission_uri then
+      Ocaml_ci.Backend_solver.local ()
+    else Ocaml_ci.Backend_solver.create submission_uri
+  in
   let repo = Current_git.Local.v (Fpath.v repo) in
   let engine =
     Current.Engine.create ~config (Pipeline.local_test ~solver repo)
@@ -23,6 +27,14 @@ let main () config mode repo : ('a, [ `Msg of string ]) result =
 (* Command-line parsing *)
 
 open Cmdliner
+
+let submission_service =
+  Arg.value @@
+  Arg.opt (Arg.some Capnp_rpc_unix.sturdy_uri) None @@
+  Arg.info
+    ~doc:"The submission.cap file for the build scheduler service"
+    ~docv:"FILE"
+    ["submission-service"]
 
 let setup_log =
   let docs = Manpage.s_common_options in
@@ -46,6 +58,7 @@ let cmd =
         $ setup_log
         $ Current.Config.cmdliner
         $ Current_web.cmdliner
-        $ repo))
+        $ repo
+        $ submission_service))
 
 let () = exit @@ Cmd.eval cmd

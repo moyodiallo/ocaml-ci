@@ -18,11 +18,11 @@ end
 (** A set of packages for a single build. *)
 module Selection = struct
   type t = {
-    id : string;  (** The platform ID from the request. *)
-    compat_pkgs : string list;
-        (** Local root packages compatible with the platform. *)
-    packages : string list;  (** The selected packages ("name.version"). *)
-    commit : string;  (** A commit in opam-repository to use. *)
+    id : string;               (** The platform ID from the request. *)
+    compat_pkgs : string list; (** Local root packages compatible with the platform. *)
+    packages : string list;    (** The commits in each opam-repository repo to use.
+                                   A pair of the repo URL and the commit hash. *)
+    commit : string;           (** A commit in opam-repository to use. *)
   }
   [@@deriving yojson, ord]
 end
@@ -30,7 +30,7 @@ end
 (** A request to select sets of packages for the builds. *)
 module Solve_request = struct
   type t = {
-    opam_repository_commit : string;  (** Commit in opam repository to use. *)
+    opam_repository_commits : (string * string) list;  (** Commit in opam repository to use. *)
     root_pkgs : (string * string) list;
         (** Name and contents of top-level opam files. *)
     pinned_pkgs : (string * string) list;
