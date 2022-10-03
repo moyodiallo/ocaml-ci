@@ -147,14 +147,14 @@ module Analysis = struct
     let request =
       {
         Ocaml_ci_api.Worker.Solve_request.opam_repository_commits =
-          ["https://github.com/ocaml/opam", Current_git.Commit_id.hash opam_repository_commit];
+          ["https://github.com/ocaml/opam-repository.git", Current_git.Commit_id.hash opam_repository_commit];
         root_pkgs;
         pinned_pkgs;
         platforms;
       }
     in
     Capnp_rpc_lwt.Capability.with_ref (job_log job) @@ fun log ->
-    Backend_solver.solve solver job request ~log >|= function
+    Backend_solver.solve solver request ~log >|= function
     | Error (`Msg msg) -> Fmt.error_msg "Error from solver: %s" msg
     | Ok [] -> Fmt.error_msg "No solution found for any supported platform"
     | Ok x -> (

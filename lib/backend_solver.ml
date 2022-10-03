@@ -16,7 +16,13 @@ let solve_to_custom req builder =
   in
   Ocaml_ci_api.Raw.Solve.Builder.Solver.Solve.Params.request_set builder params
 
-let remote_solve con job request =
+let remote_solve con request =
+  let job =
+    Current.Job.create
+      ~switch:(Current.Switch.create ~label:"remote solve switch" ())
+      ~label:"remote solving"
+      ~config:(Current.Config.v ()) ()
+  in
   let action =
     Cluster_api.Submission.custom_build
     @@ Cluster_api.Custom.v ~kind:"solve"
@@ -33,11 +39,11 @@ let remote_solve con job request =
 let local ?solver_dir () : t =
   `Local (Lwt.return (Solver_pool.spawn_local ?solver_dir ()))
 
-let solve t job request ~log = match t with
+let solve t request ~log = match t with
   | `Local ci ->
     ci >>= fun solver -> Ocaml_ci_api.Solver.solve solver request ~log
   | `Remote con ->
-    remote_solve con job request >>!= fun response ->
+    remote_solve con request >>!= fun response ->
     match
       Ocaml_ci_api.Worker.Solve_response.of_yojson
         (Yojson.Safe.from_string response)
