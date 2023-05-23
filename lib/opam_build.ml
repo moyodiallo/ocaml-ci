@@ -105,7 +105,10 @@ let install_project_deps ~opam_version ~opam_files ~selection =
         ]
     | `macOS ->
         [
-          Obuilder_spec.Cache.v download_cache ~target:"~/.opam/download-cache";
+          Obuilder_spec.Cache.v download_cache
+            ~target:"/Users/mac1000/.opam/download-cache";
+          Obuilder_spec.Cache.v "homebrew"
+            ~target:"/Users/mac1000/Library/Caches/Homebrew";
         ]
   in
   let network = [ "host" ] in
@@ -143,8 +146,8 @@ let install_project_deps ~opam_version ~opam_files ~selection =
           compatible_root_pkgs
   in
   (if Variant.arch variant |> Ocaml_version.arch_is_32bit then
-   [ shell [ "/usr/bin/linux32"; "/bin/sh"; "-c" ] ]
-  else [])
+     [ shell [ "/usr/bin/linux32"; "/bin/sh"; "-c" ] ]
+   else [])
   @ [ env "CLICOLOR_FORCE" "1" ]
   @ [ env "OPAMCOLOR" "always" ]
   @ (match home_dir with

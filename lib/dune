@@ -22,4 +22,9 @@
   ocluster-api
   solver-worker
   obuilder-spec
-  dockerfile-opam))
+  dockerfile-opam
+  timedesc
+  cohttp-lwt-unix
+  tar
+  tar-unix
+  tar.gz))

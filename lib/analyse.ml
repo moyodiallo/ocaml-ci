@@ -3,6 +3,7 @@ open Current.Syntax
 module Worker = Ocaml_ci_api.Worker
 
 let pool = Current.Pool.create ~label:"analyse" 20
+let solver_pool = Current.Pool.create ~label:"temporary-bottleneck" 4
 
 let is_empty_file x =
   match Unix.lstat (Fpath.to_string x) with
@@ -157,6 +158,8 @@ module Analysis = struct
         lower_bound;
       }
     in
+    Current.Job.log job "Solving with opam-repository commit: %a"
+      Current_git.Commit_id.pp opam_repository_commit;
     Capnp_rpc_lwt.Capability.with_ref (job_log job) @@ fun log ->
     Backend_solver.solve solver job request ~log >|= function
     | Error (`Msg msg) -> Fmt.error_msg "Error from solver: %s" msg
@@ -396,7 +399,8 @@ module Examine = struct
   let id = "ci-analyse"
 
   let run solver job src { Value.opam_repository_commit; platforms } =
-    Current.Job.start job ~level:Current.Level.Harmless >>= fun () ->
+    Current.Job.start_with ~pool:solver_pool job ~level:Current.Level.Harmless
+    >>= fun () ->
     Current_git.with_checkout ~job ~pool src @@ fun src ->
     Analysis.of_dir ~solver ~platforms ~opam_repository_commit ~job src
 

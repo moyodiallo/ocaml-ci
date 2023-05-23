@@ -4,23 +4,27 @@ synopsis: "Core ocaml-ci"
 maintainer: ["talex5@gmail.com"]
 authors: ["talex5@gmail.com"]
 homepage: "https://github.com/ocurrent/ocaml-ci"
-doc: "https://ci.ocamllabs.io/documentation"
+doc: "https://ocaml.ci.dev/documentation"
 bug-reports: "https://github.com/ocurrent/ocaml-ci/issues"
 depends: [
-  "dune" {>= "3.6"}
+  "dune" {>= "3.7"}
   "ocaml" {>= "4.13"}
-  "logs"
+  "logs" {>= "0.7.0"}
   "current"
   "current_docker"
+  "current_rpc"
   "omigrate" {>= "0.3.2"}
   "ocaml-ci-api"
   "capnp-rpc-unix"
   "ppx_deriving_yojson"
-  "ocaml-version" {>= "3.6.0"}
+  "ocaml-version" {>= "3.6.1"}
   "opam-0install" {>= "0.4.3"}
   "current_ocluster"
   "ocluster-api"
   "obuilder-spec"
+  "solver-service"
+  "tar" {>= "2.4.0"}
+  "tar-unix" {>= "2.4.0"}
   "odoc" {with-doc}
 ]
 build: [

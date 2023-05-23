@@ -1,18 +1,24 @@
-FROM ocaml/opam:debian-11-ocaml-4.14@sha256:8e2bda1bc44c16fadb0b039a7708fb5699236922ac91918e30aed2fa92b9ea54 AS build
-RUN sudo apt-get update && sudo apt-get install libev-dev capnproto m4 pkg-config libgmp-dev libssl-dev libsqlite3-dev -y --no-install-recommends
-RUN cd ~/opam-repository && git fetch -q origin master && git reset --hard e0171a799fbb4458db77a10f76a6279727aac521 && opam update
+FROM ocaml/opam:debian-11-ocaml-4.14@sha256:18fcbeb356957c58cf8f37bc43adcca5683d50163a120d9b322b173428281e61 AS build
+RUN sudo apt-get update && sudo apt-get install libev-dev capnproto m4 pkg-config libgmp-dev libssl-dev libffi-dev libsqlite3-dev -y --no-install-recommends
+RUN cd ~/opam-repository && git fetch -q origin master && git reset --hard 15b381eeae1aa1c8b67b214ce1739344717aae89 && opam update
 COPY --chown=opam \
-	ocurrent/current_rpc.opam \
-	/src/ocurrent/
+    ocurrent/current_rpc.opam \
+    /src/ocurrent/
+COPY --chown=opam \
+    solver-service/solver-service.opam \
+    solver-service/solver-worker.opam \
+    solver-service/solver-service-api.opam \
+    /src/solver-service/
 WORKDIR /src
 RUN opam pin -yn add ./ocurrent
-COPY --chown=opam ocaml-ci-api.opam ocaml-ci-web.opam ocaml-ci-client-lib.opam /src/
+RUN opam pin -yn add ./solver-service
+COPY --chown=opam ocaml-ci-api.opam ocaml-ci-web.opam ocaml-ci.opam /src/
 RUN opam install -y --deps-only .
 ADD --chown=opam . .
 RUN opam config exec -- dune build ./_build/install/default/bin/ocaml-ci-web
 
 FROM debian:11
-RUN apt-get update && apt-get install libev4 curl jq dumb-init -y --no-install-recommends
+RUN apt-get update && apt-get install libev4 libsqlite3-dev curl jq dumb-init -y --no-install-recommends
 WORKDIR /
 ENTRYPOINT ["dumb-init", "/usr/local/bin/ocaml-ci-web"]
 

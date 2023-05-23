@@ -4,20 +4,19 @@ synopsis: "Web-server frontend for ocaml-ci"
 maintainer: ["talex5@gmail.com"]
 authors: ["talex5@gmail.com"]
 homepage: "https://github.com/ocurrent/ocaml-ci"
-doc: "https://ci.ocamllabs.io/documentation"
+doc: "https://ocaml.ci.dev/documentation"
 bug-reports: "https://github.com/ocurrent/ocaml-ci/issues"
 depends: [
-  "dune" {>= "3.6"}
+  "dune" {>= "3.7"}
   "ansi" {>= "0.6.0"}
   "capnp-rpc-unix" {>= "1.2"}
   "crunch" {>= "3.2.0" & build}
-  "dream"
+  "dream" {= "1.0.0~alpha5"}
   "fmt" {>= "0.8.9"}
   "logs" {>= "0.7.0"}
   "lwt" {>= "5.6.1"}
   "ocaml" {>= "4.13"}
   "ocaml-ci-api"
-  "ocaml-ci-client-lib"
   "prometheus-app" {>= "1.2"}
   "tyxml"
   "tailwindcss"
@@ -40,8 +39,5 @@ build: [
 ]
 dev-repo: "git+https://github.com/ocurrent/ocaml-ci.git"
 pin-depends: [
-  ["dream.dev" "git+https://github.com/novemberkilo/dream#4976439384c9da03300abdbc9ffb8528ac917982"]
-  ["dream-httpaf.dev" "git+https://github.com/novemberkilo/dream#4976439384c9da03300abdbc9ffb8528ac917982"]
-  ["dream-pure.dev" "git+https://github.com/novemberkilo/dream#4976439384c9da03300abdbc9ffb8528ac917982"]
-  ["tailwindcss.dev" "git+https://github.com/tmattio/opam-tailwindcss#97ec16bb4933ec3eaf2cfd2b89e38dfbb3a9cf8e"]
+  ["tailwindcss.~dev" "https://github.com/tmattio/opam-tailwindcss/archive/f0d65be5f94322f48497b33bc05c057882d57977.tar.gz"]
 ]

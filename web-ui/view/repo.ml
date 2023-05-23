@@ -1,5 +1,6 @@
 open Tyxml.Html
 module Client = Git_forge_intf.Client
+module Run_time = Ocaml_ci.Run_time
 
 module Make (M : Git_forge_intf.Forge) = struct
   let profile_picture org =
@@ -98,7 +99,7 @@ module Make (M : Git_forge_intf.Forge) = struct
   }
 
   let row ~repo_title ~short_hash ~last_updated ~status ~description ~repo_uri
-      ~statistics =
+      ~statistics ~default_ref =
     let info =
       let hash = span ~a:[ a_class [ "font-medium" ] ] [ txt short_hash ] in
       match last_updated with
@@ -109,7 +110,7 @@ module Make (M : Git_forge_intf.Forge) = struct
               hash;
               txt
                 (Printf.sprintf " on %s"
-                   (Timestamps_durations.pp_timestamp last_updated));
+                   (Run_time.Duration.pp_readable_opt last_updated));
             ]
     in
     (* Defaulting infinity means sorting by recent places them at the bottom of the page *)
@@ -183,7 +184,7 @@ module Make (M : Git_forge_intf.Forge) = struct
         td
           ~a:[ a_class [ "text-xs space-y-1 hidden lg:table-cell" ] ]
           [
-            div [ txt "master" ];
+            div [ txt default_ref ];
             div
               ~a:[ a_class [ "shadow-sm mb-4" ] ]
               [
@@ -238,20 +239,31 @@ module Make (M : Git_forge_intf.Forge) = struct
 
   let repo_url org repo = Printf.sprintf "/%s/%s/%s" M.prefix org repo
 
+  let run_time_tooltip =
+    txt "The average running time of all the default branch's completed builds."
+
+  let reliability_tooltip =
+    txt "The percentage of builds of the default branch that passed."
+
+  let frequency_tooltip =
+    txt "The number of builds of the default branch per week."
+
   let table_head name =
     thead
       [
         tr
           [
-            th [ div [ txt name ] ];
-            th
-              ~a:[ a_class [ "hidden lg:table-cell" ] ]
-              [ txt "Speed over time" ];
-            th ~a:[ a_class [ "hidden md:table-cell" ] ] [ txt "Speed" ];
-            th ~a:[ a_class [ "hidden md:table-cell" ] ] [ txt "Reliability" ];
+            th [ txt name ];
+            th ~a:[ a_class [ "hidden lg:table-cell" ] ] [];
             th
               ~a:[ a_class [ "hidden md:table-cell" ] ]
-              [ txt "Build frequency" ];
+              [ Common.tooltip "Mean run time" run_time_tooltip ];
+            th
+              ~a:[ a_class [ "hidden md:table-cell" ] ]
+              [ Common.tooltip "Reliability" reliability_tooltip ];
+            th
+              ~a:[ a_class [ "hidden md:table-cell" ] ]
+              [ Common.tooltip "Build frequency" frequency_tooltip ];
             th [];
           ];
       ]
@@ -373,7 +385,14 @@ module Make (M : Git_forge_intf.Forge) = struct
       table_head (Printf.sprintf "Repositories (%d)" (List.length repos))
     in
     let table =
-      let f { Client.Org.name; main_status; main_hash; main_last_updated } =
+      let f
+          {
+            Client.Org.name;
+            default_ref;
+            main_status;
+            main_hash;
+            main_last_updated;
+          } =
         let history =
           snd @@ List.find (fun (repo, _) -> String.equal name repo) histories
         in
@@ -381,6 +400,7 @@ module Make (M : Git_forge_intf.Forge) = struct
           ~short_hash:(Common.short_hash main_hash)
           ~last_updated:main_last_updated ~status:main_status ~description:""
           ~repo_uri:(repo_url org name) ~statistics:(repo_statistics history)
+          ~default_ref
       in
       List.map f (List.sort repo_name_compare repos)
     in
